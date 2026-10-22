@@ -39,6 +39,3 @@ def chat(user_message: str) -> str:
             messages.append(
                 {"role": "tool", "tool_call_id": tool_call.id, "content": result}
             )
-
-        final_response = client.chat.completions.create(model=MODEL, messages=messages)
-        return final_response.choices[0].message.content
