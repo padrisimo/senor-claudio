@@ -20,25 +20,25 @@ def chat(user_message: str) -> str:
         },
         {"role": "user", "content": user_message},
     ]
-
-    response = client.chat.completions.create(
-        model=MODEL,
-        messages=messages,
-        tools=TOOL_SCHEMAS,
-    )
-    message = response.choices[0].message
-
-    if not message.tool_calls:
-        return message.content or ""
-
-    messages.append(message)
-    for tool_call in message.tool_calls:
-        args = json.loads(tool_call.function.arguments or {})
-        print(f"Calling tool: {tool_call.function.name} with arguments: {args}")
-        result = TOOLS[tool_call.function.name](**args)
-        messages.append(
-            {"role": "tool", "tool_call_id": tool_call.id, "content": result}
+    while True:
+        response = client.chat.completions.create(
+            model=MODEL,
+            messages=messages,
+            tools=TOOL_SCHEMAS,
         )
+        message = response.choices[0].message
 
-    final_response = client.chat.completions.create(model=MODEL, messages=messages)
-    return final_response.choices[0].message.content
+        if not message.tool_calls:
+            return message.content or ""
+
+        messages.append(message)
+        for tool_call in message.tool_calls:
+            args = json.loads(tool_call.function.arguments or {})
+            print(f"Calling tool: {tool_call.function.name} with arguments: {args}")
+            result = TOOLS[tool_call.function.name](**args)
+            messages.append(
+                {"role": "tool", "tool_call_id": tool_call.id, "content": result}
+            )
+
+        final_response = client.chat.completions.create(model=MODEL, messages=messages)
+        return final_response.choices[0].message.content
