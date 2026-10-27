@@ -9,10 +9,11 @@ client = AsyncOpenAI(base_url="http://localhost:11434/v1", api_key="ollama")
 MODEL = "qwen3:1.7b"
 
 
-from senor_claudio.tools import TOOL_SCHEMAS, TOOLS
+from senor_claudio.tools import TOOL_SCHEMAS
+from senor_claudio.mcp_servers import call_tool
 
 
-async def chat(user_message: str) -> str:
+async def run_agent(user_message: str) -> str:
     messages = [
         {
             "role": "system",
@@ -31,11 +32,11 @@ async def chat(user_message: str) -> str:
         if not message.tool_calls:
             return message.content or ""
 
-        messages.append(message)
+        messages.append(message.model_dump(exclude_none=True))
         for tool_call in message.tool_calls:
-            args = json.loads(tool_call.function.arguments or {})
+            args = json.loads(tool_call.function.arguments or "{}")
             print(f"Calling tool: {tool_call.function.name} with arguments: {args}")
-            result = TOOLS[tool_call.function.name](**args)
+            result = await call_tool(tool_call.function.name, args)
             messages.append(
                 {"role": "tool", "tool_call_id": tool_call.id, "content": result}
             )

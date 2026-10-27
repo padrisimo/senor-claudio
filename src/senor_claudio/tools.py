@@ -26,7 +26,7 @@ def write_file(filename: str, content: str) -> str:
     return f"File '{filename}' written successfully."
 
 
-TOOLS = {"list_files": list_files, "read_file": read_file, "write_file": write_file}
+LOCAL_TOOLS = {"list_files": list_files, "read_file": read_file, "write_file": write_file}
 
 TOOL_SCHEMAS = [
     {

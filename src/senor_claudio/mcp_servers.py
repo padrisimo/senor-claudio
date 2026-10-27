@@ -1,16 +1,16 @@
-import asyncio
 from contextlib import AsyncExitStack
-from tkinter.tix import Form
 
 from mcp import ClientSession, StdioServerParameters
 from mcp.client.stdio import stdio_client
 
+from senor_claudio.tools import LOCAL_TOOLS, TOOL_SCHEMAS
+
 MCP_SERVERS = {
-    "time": StdioServerParameters(command="uvx", args="mcp_server_time"),
-    "fetch": StdioServerParameters(command="uvx", args="mcp_server_fetch"),
+    "time": StdioServerParameters(command="uvx", args=["mcp-server-time"]),
+    "fetch": StdioServerParameters(command="uvx", args=["mcp-server-fetch"]),
 }
 
-mcp_sessions: dict[str, ClientSession]
+mcp_sessions: dict[str, ClientSession] = {}
 
 
 async def connect_mcp(stack: AsyncExitStack):
@@ -34,3 +34,16 @@ async def connect_mcp(stack: AsyncExitStack):
                 }
             )
         print(f" [mcp] connected '{name}': {[t.name for t in tools]}")
+        
+async def call_tool(name: str, args: dict) -> str:
+    """Run a tool - ours directly or an MCP server's over the protocol"""
+    try:
+        if name in LOCAL_TOOLS:
+            return LOCAL_TOOLS[name](**args)
+        session = mcp_sessions.get(name)
+        if session is None:
+            return f"Unknown tool: {name}"
+        result = await session.call_tool(name, args)
+        return "\n".join(c.text for c in result.content if hasattr(c, "text"))
+    except Exception as e:
+        return f"Error running tool '{name}': {e}"
