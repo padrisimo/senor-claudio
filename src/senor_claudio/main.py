@@ -1,4 +1,4 @@
-from chat import MODEL, chat
+from senor_claudio.chat import MODEL, chat
 
 
 if __name__ == "__main__":

@@ -1,18 +1,18 @@
 import sys
-from openai import OpenAI
+from openai import AsyncOpenAI
 
 sys.stdout.reconfigure(encoding="utf-8")
 
 import json
 
-client = OpenAI(base_url="http://localhost:11434/v1", api_key="ollama")
+client = AsyncOpenAI(base_url="http://localhost:11434/v1", api_key="ollama")
 MODEL = "qwen3:1.7b"
 
 
-from tools import TOOL_SCHEMAS, TOOLS
+from senor_claudio.tools import TOOL_SCHEMAS, TOOLS
 
 
-def chat(user_message: str) -> str:
+async def chat(user_message: str) -> str:
     messages = [
         {
             "role": "system",
@@ -21,7 +21,7 @@ def chat(user_message: str) -> str:
         {"role": "user", "content": user_message},
     ]
     while True:
-        response = client.chat.completions.create(
+        response = await client.chat.completions.create(
             model=MODEL,
             messages=messages,
             tools=TOOL_SCHEMAS,
