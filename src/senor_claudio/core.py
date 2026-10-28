@@ -20,7 +20,17 @@ async def core():
                 line = (await asyncio.to_thread(input, "you: ")).strip()
                 if not line or handle_command(line):
                     continue
-                answer = await run_agent(messages, line)
-                print(f"Señor Claudio:", answer)
+                try:
+                    answer = await run_agent(messages, line)
+                    print(f"Señor Claudio:", answer)
+                except Exception as e:
+                    msg = str(e)
+                    if "does not support tools" in msg.lower():
+                        print(
+                            "  [error] el modelo actual no soporta tool-calling. "
+                            "Cambia con /model a uno compatible (ej. local)."
+                        )
+                    else:
+                        print(f"  [error] {type(e).__name__}: {e}")
         except (EOFError, KeyboardInterrupt, SystemExit):
             print("\nAdios amigo!")
