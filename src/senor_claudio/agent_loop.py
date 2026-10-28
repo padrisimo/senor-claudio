@@ -1,12 +1,14 @@
 import sys
 from openai import AsyncOpenAI
 
+from senor_claudio.models import MODELS, model_name
+
 sys.stdout.reconfigure(encoding="utf-8")
 
 import json
 
-client = AsyncOpenAI(base_url="http://localhost:11434/v1", api_key="ollama")
-MODEL = "qwen3:1.7b"
+cfg = MODELS[model_name]
+client = AsyncOpenAI(base_url=cfg.base_url, api_key=cfg.api_key)
 
 
 from senor_claudio.tools import TOOL_SCHEMAS
@@ -16,7 +18,7 @@ from senor_claudio.mcp_servers import call_tool
 async def run_agent(messages: list) -> str:
     while True:
         response = await client.chat.completions.create(
-            model=MODEL,
+            model=cfg.model,
             messages=messages,
             tools=TOOL_SCHEMAS,
         )
