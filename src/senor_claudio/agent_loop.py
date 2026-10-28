@@ -13,14 +13,7 @@ from senor_claudio.tools import TOOL_SCHEMAS
 from senor_claudio.mcp_servers import call_tool
 
 
-async def run_agent(user_message: str) -> str:
-    messages = [
-        {
-            "role": "system",
-            "content": "You are a helpful code assistant, follow YAGNI principles and provide concise answers.",
-        },
-        {"role": "user", "content": user_message},
-    ]
+async def run_agent(messages: list) -> str:
     while True:
         response = await client.chat.completions.create(
             model=MODEL,
@@ -32,7 +25,7 @@ async def run_agent(user_message: str) -> str:
         if not message.tool_calls:
             return message.content or ""
 
-        messages.append(message.model_dump(exclude_none=True))
+        messages.append(message)
         for tool_call in message.tool_calls:
             args = json.loads(tool_call.function.arguments or "{}")
             print(f"Calling tool: {tool_call.function.name} with arguments: {args}")
