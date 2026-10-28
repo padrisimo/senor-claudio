@@ -1,6 +1,6 @@
 from pathlib import Path
 
-WORKSPACE = Path(__file__).parent / "workspace"
+WORKSPACE = Path(__file__).resolve().parents[2] / "workspace"
 MEMORY_FILE = Path(__file__).parent / "memory.md"
 
 

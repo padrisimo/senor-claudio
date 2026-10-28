@@ -1,21 +1,20 @@
 import sys
 from openai import AsyncOpenAI
 
-from senor_claudio.models import MODELS, model_name
-
 sys.stdout.reconfigure(encoding="utf-8")
 
 import json
 
-cfg = MODELS[model_name]
-client = AsyncOpenAI(base_url=cfg.base_url, api_key=cfg.api_key)
-
-
+from senor_claudio import models
 from senor_claudio.tools import TOOL_SCHEMAS
 from senor_claudio.mcp_servers import call_tool
 
 
-async def run_agent(messages: list) -> str:
+async def run_agent(messages: list, user_message: str) -> str:
+    cfg = models.MODELS[models.model_name]
+    client = AsyncOpenAI(base_url=cfg.base_url, api_key=cfg.api_key)
+    messages.append({"role": "user", "content": user_message})
+
     while True:
         response = await client.chat.completions.create(
             model=cfg.model,
@@ -25,6 +24,7 @@ async def run_agent(messages: list) -> str:
         message = response.choices[0].message
 
         if not message.tool_calls:
+            messages.append({"role": "assistant", "content": message.content})
             return message.content or ""
 
         messages.append(message)

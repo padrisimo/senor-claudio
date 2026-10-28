@@ -1,21 +1,20 @@
-from senor_claudio.models import MODELS
+from senor_claudio import models
 from senor_claudio.tools import LOCAL_TOOLS, TOOL_SCHEMAS, load_memory
 
 
 def handle_command(line: str) -> bool:
     """Returns True if the line was a command."""
-    global model_name
     if not line.startswith("/"):
         return False
     cmd, _, arg = line.partition(" ")
     if cmd == "/models":
-        for name, cfg in MODELS.items():
-            marker = "*" if name == model_name else " "
+        for name, cfg in models.MODELS.items():
+            marker = "*" if name == models.model_name else " "
             print(f" {marker} {name:<12} {cfg.model}  ({cfg.base_url})")
     elif cmd == "/model":
-        if arg in MODELS:
-            model_name = arg
-            print(f"  switched to {arg} ({MODELS[arg].model})")
+        if arg in models.MODELS:
+            models.model_name = arg
+            print(f"  switched to {arg} ({models.MODELS[arg].model})")
         else:
             print(f"  unknown model '{arg}' - try /models")
     elif cmd == "/tools":
